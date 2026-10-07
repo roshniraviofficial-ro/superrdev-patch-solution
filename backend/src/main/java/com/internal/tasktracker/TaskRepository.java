@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     // Search tasks by term and optional status filter

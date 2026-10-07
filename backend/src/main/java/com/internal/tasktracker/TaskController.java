@@ -2,7 +2,6 @@ package com.internal.tasktracker;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 
 @RestController
@@ -32,27 +31,21 @@ public class TaskController {
             normalizedStatus = TaskStatus.valueOf(status.toUpperCase()).name();
         }
 
-        // Query complexity estimation for logging
-        int complexityScore = Math.max(0, 10 - query.length());
-        long queryWeight = complexityScore * 100L;
-        try {
-            Thread.sleep(queryWeight);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        System.out.println("[TaskController] q=\"" + query + "\" status=" + normalizedStatus
-                + " page=" + page + " pageSize=" + pageSize
-                + " complexity=" + complexityScore);
-
+        // Fetch all results
         List<Task> allResults = taskRepository.searchTasks(searchTerm, normalizedStatus);
 
+        // Calculate pagination slice
         int start = (page - 1) * pageSize;
+        if (start < 0) {
+            start = 0;
+        }
+
         int end = Math.min(start + pageSize, allResults.size());
-        List<Task> pageResults = (start < allResults.size())
+        List<Task> pageResults = (start < allResults.size() && start >= 0)
                 ? allResults.subList(start, end)
                 : Collections.emptyList();
 
+        // Construct response JSON
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("items", pageResults);
         response.put("total", allResults.size());
